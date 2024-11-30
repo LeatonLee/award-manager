@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD MyBatis Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ClassMapper">
+    <!-- 判断是否是班级管理员 -->
+    <select id="isAdminOfClass" resultType="boolean">
+        SELECT EXISTS (
+        SELECT 1
+        FROM user
+        WHERE id = #{studentId} AND grade_class = #{className} AND role = '2'
+        )
+    </select>
+
+    <!-- 根据班级名称获取成员列表 -->
+    <select id="findMembersByClassName" resultType="com.example.pojo.User">
+        SELECT id, name, grade_class AS gradeClass, phone, role, created_at AS createdAt, updated_at AS updatedAt
+        FROM user
+        WHERE grade_class = #{className} AND role = '1'
+    </select>
+
+    <!-- 插入新成员 -->
+    <insert id="insertMember">
+        INSERT INTO user (name, grade_class, phone, role, created_at, updated_at)
+        VALUES (#{name}, #{gradeClass}, #{phone}, #{role}, NOW(), NOW())
+    </insert>
+
+    <!-- 更新成员信息 -->
+    <update id="updateMember">
+        UPDATE user
+        SET name = #{name}, grade_class = #{gradeClass}, role = #{role}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除成员 -->
+    <delete id="deleteMember">
+        DELETE FROM user WHERE id = #{id}
+    </delete>
+</mapper>

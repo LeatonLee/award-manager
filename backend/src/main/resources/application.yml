@@ -1,0 +1,25 @@
+server:
+  port: 7777
+
+spring:
+  #数据库的连接信息
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/lyt
+    username: root
+    password: Lyt20040512
+  jpa:
+    open-in-view: false
+#Mybatis配置
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+    log-impl=org:
+      apache:
+        ibatis:
+          logging:
+            slf4j:
+              Slf4jImpl:
+  mapper-locations: classpath:/mapper/*.xml
+  type-aliases-package: com.example.pojo
