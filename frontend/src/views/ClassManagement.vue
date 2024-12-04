@@ -1,10 +1,36 @@
 <template>
   <el-card>
+    <div class="search-bar">
+  <!-- 姓名模糊搜索 -->
+  <el-input 
+    v-model="searchParams.name" 
+    placeholder="按姓名搜索" 
+    clearable 
+    style="width: 200px; margin-right: 10px;"
+  />
+  
+  <!-- 学号模糊搜索 -->
+  <el-input 
+    v-model="searchParams.id" 
+    placeholder="按学号搜索" 
+    clearable 
+    style="width: 200px; margin-right: 10px;"
+  />
+  
+  <!-- 排序 -->
+  <el-select v-model="searchParams.sortByAwards" placeholder="按获奖数量排序" style="width: 200px;">
+    <el-option label="升序" value="asc"></el-option>
+    <el-option label="降序" value="desc"></el-option>
+  </el-select>
+
+  <el-button type="primary" @click="searchMembers">搜索</el-button>
+  <el-button @click="clearSearch">清除</el-button>
+</div>
     <!-- 班级信息 -->
     <div class="class-info">
       <el-row>
         <el-col :span="24">
-          <h3>您管理的班级：<strong>{{ className }}</strong></h3>
+          <h3>您管理的班级：<strong>{{ localClassName }}</strong></h3>
         </el-col>
       </el-row>
     </div>
@@ -17,6 +43,15 @@
       <el-table-column prop="phone" label="电话" width="180"></el-table-column>
       <el-table-column prop="createdAt" label="创建时间" width="200"></el-table-column>
     </el-table>
+
+    <!-- 分页组件 -->
+    <el-pagination
+      :total="totalMembers"
+      :page-size="pageSize"
+      :current-page.sync="currentPage"
+      layout="total, prev, pager, next, jumper"
+      @current-change="handlePageChange"
+    />
 
     <!-- 添加成员按钮 -->
     <el-button type="primary" @click="openDialog">添加成员</el-button>
@@ -52,6 +87,9 @@ export default {
     return {
       localClassName: this.className, // 将传入的 className 赋值给本地变量
       classMembers: [],  // 班级成员列表
+      totalMembers: 0,   // 总成员数量
+      pageSize: 10,      // 每页显示的成员数量
+      currentPage: 1,    // 当前页码
       memberForm: {
         id: null,
         name: '',
@@ -59,6 +97,11 @@ export default {
       },
       dialogVisible: false, // 控制弹窗显示
       userName: '', // 登录者姓名
+      searchParams: {
+        name: '',
+        id: '',
+        sortByAwards: ''
+      },
     };
   },
   mounted() {
@@ -68,7 +111,7 @@ export default {
       try {
         const decoded = jwtDecode(token);
         this.userName = decoded.name; // 获取用户名
-        this.localClassName = decoded.className; // 获取班级名称
+        this.localClassName = decoded.className || this.className; // 获取班级名称
         // 获取班级成员数据
         this.fetchClassMembers();
       } catch (error) {
@@ -79,34 +122,81 @@ export default {
     }
   },
   methods: {
+     // 处理输入变化，进行模糊查询
+     handleInput(field) {
+      clearTimeout(this.debounceTimeout);
+      this.debounceTimeout = setTimeout(() => {
+        if (this.searchParams[field].trim()) {
+          this.fetchSuggestions(field);
+        } else {
+          this.suggestions[field] = []; // 清空建议列表
+        }
+      }, 300); // 延迟300ms以减少频繁请求
+    },
+
+    // 获取模糊匹配建议
+    fetchSuggestions(field) {
+      axios.get(`/api/search/suggestions`, {
+        params: { query: this.searchParams[field], field }
+      })
+      .then(response => {
+        this.suggestions[field] = response.data.suggestions || [];
+      })
+      .catch(error => {
+        console.error(`获取${field}建议失败`, error);
+      });
+    },
+
+    // 选择建议项
+    selectSuggestion(field, value) {
+      this.searchParams[field] = value;
+      this.suggestions[field] = []; // 清空建议列表
+    },
+
+    // 搜索成员
+    searchMembers() {
+      this.fetchClassMembers(1); // 调用获取成员的方法
+    },
     // 获取班级成员数据
-    fetchClassMembers() {
+    fetchClassMembers(page = this.currentPage) {
       const token = localStorage.getItem('token');
       if (!token) {
         console.error('Token 不存在');
         return;
       }
-      axios.get(`/api/classes/${this.className}`, {
+
+      axios.get(`/api/classes/${this.localClassName}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        params: {
+          page: page,                   // 当前页码
+          pageSize: this.pageSize,      // 每页显示的条数
+          name: this.searchParams.name, // 姓名过滤
+          id: this.searchParams.id,     // 学号过滤
+          sortByAwards: this.searchParams.sortByAwards, // 按获奖数量排序
+        }
       })
       .then(response => {
         console.log('班级成员数据：', response.data);  // 打印返回的数据，确认数据结构
-        if (Array.isArray(response.data)) {
-          this.classMembers = response.data;  // 赋值给 classMembers
-          this.$nextTick(() => {
-            console.log('班级成员数据已更新：', this.classMembers);
-          });
+        if (response.data.code === 1 && response.data.data) {
+          const { total, rows } = response.data.data; 
+          this.classMembers = rows;          // 成员数据
+          this.totalMembers = total;         // 总成员数量
+          this.pageSize = 10;                // 每页大小
+          this.currentPage = page;           // 当前页码
         } else {
-          console.error('返回的数据不是数组');
+          console.error('返回的数据结构错误');
         }
       })
       .catch(error => {
         console.error('获取班级成员失败', error);
       });
     },
-
+    // 翻页
+    handlePageChange(page) {
+      this.fetchClassMembers(page);  // 获取新一页数据
+    },
     // 格式化日期函数
     formatDate(date) {
       const d = new Date(date);
@@ -123,7 +213,15 @@ export default {
     closeDialog() {
       this.dialogVisible = false;
     },
-
+    // 清除所有搜索条件
+    clearSearch() {
+      this.searchParams = {
+        name: '',
+        id: '',
+        sortByAwards: ''
+      };
+      this.fetchClassMembers(1); // 清除后重新加载第一页数据
+  },
     // 提交成员（添加/更新）
     submitMember() {
       const token = localStorage.getItem('token');
@@ -134,30 +232,34 @@ export default {
 
       if (this.memberForm.id) {
         // 更新成员
-        axios.put(`/api/classes/members/${this.memberForm.id}`, this.memberForm)
-          .then(() => {
-            this.$message.success('成员更新成功');
-            this.fetchClassMembers();
-            this.closeDialog();
-          })
-          .catch(error => {
-            console.error('更新成员失败', error);
-          });
-      } else {
-        // 添加新成员
-        axios.post(`/api/classes/${this.className}/members`, this.memberForm, {
+        axios.put(`/api/classes/members/${this.memberForm.id}`, this.memberForm, {
           headers: {
             Authorization: `Bearer ${token}`,
           }
         })
-          .then(() => {
-            this.$message.success('成员添加成功');
-            this.fetchClassMembers();
-            this.closeDialog();
-          })
-          .catch(error => {
-            console.error('添加成员失败', error);
-          });
+        .then(() => {
+          this.$message.success('成员更新成功');
+          this.fetchClassMembers(this.currentPage); // 重新加载成员数据
+          this.closeDialog();
+        })
+        .catch(error => {
+          console.error('更新成员失败', error);
+        });
+      } else {
+        // 添加新成员
+        axios.post(`/api/classes/${this.localClassName}/members`, this.memberForm, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        })
+        .then(() => {
+          this.$message.success('成员添加成功');
+          this.fetchClassMembers(this.currentPage); // 重新加载成员数据
+          this.closeDialog();
+        })
+        .catch(error => {
+          console.error('添加成员失败', error);
+        });
       }
     },
 
@@ -180,17 +282,19 @@ export default {
           Authorization: `Bearer ${token}`,
         }
       })
-        .then(() => {
-          this.$message.success('成员删除成功');
-          this.fetchClassMembers();
-        })
-        .catch(error => {
-          console.error('删除成员失败', error);
-        });
-    }
+      .then(() => {
+        this.$message.success('成员删除成功');
+        this.fetchClassMembers(this.currentPage); // 重新加载成员数据
+      })
+      .catch(error => {
+        console.error('删除成员失败', error);
+      });
+    },
   }
-};
+}
 </script>
+
+
 
 <style scoped>
 /* 表格列标题 */
@@ -209,6 +313,21 @@ export default {
   margin-top: 20px;
   width: 200px; /* 固定宽度 */
   min-height: 100%; /* 使侧边栏至少填满整个页面高度 */
+}
+.search-bar {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-bar .el-input,
+.search-bar .el-select {
+  width: 200px;
+}
+
+.search-bar .el-button {
+  margin-left: 10px;
 }
 .class-info {
     margin-bottom: 30px;
