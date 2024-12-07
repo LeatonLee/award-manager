@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.pojo.User;
+import com.example.pojo.UserDTO;
 
 /**
  * 用户管理
@@ -15,9 +16,9 @@ public interface UserService {
 
     /**
      * 注册用户
-     * @param user
+     * @param userDTO
      */
-    void registerUser(User user);
+    void registerUser(UserDTO userDTO);
 
     /**
      * 判断用户是否存在

@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.pojo.GradeClass;
 import com.example.pojo.PageBean;
 import com.example.pojo.Result;
 import com.example.service.ClassService;
@@ -8,12 +9,20 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/classes")
 public class ClassController {
 
     @Autowired
     private ClassService classService;
+
+    // 获取班级列表
+    @GetMapping
+    public List<GradeClass> getClassList() {
+        return classService.getClassList();
+    }
 
     @GetMapping("/{className}")
     public Result getClassMembers(@PathVariable String className,

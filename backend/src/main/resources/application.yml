@@ -10,6 +10,11 @@ spring:
     password: Lyt20040512
   jpa:
     open-in-view: false
+  redis:
+    host: localhost
+    port: 6379
+    password: Lyt20040512
+    database: 0
 #Mybatis配置
 mybatis:
   configuration:

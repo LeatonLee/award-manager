@@ -3,7 +3,6 @@ package com.example.mapper;
 import com.example.pojo.User;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 
 @Mapper
@@ -28,9 +27,8 @@ public interface UserMapper {
     @Select("SELECT * FROM user WHERE phone = #{phone}")
     User findByPhone(String phone);
 
-    @Insert("INSERT INTO user (id,name, grade_class, phone, password, role) " +
-            "VALUES (#{id},#{name}, #{gradeClass}, #{phone}, #{password}, #{role})")
-    @Options(useGeneratedKeys = true, keyProperty = "id")
+    @Insert("INSERT INTO user (id, name, grade_class, phone, password, role, created_at, updated_at) " +
+            "VALUES (#{id}, #{name}, #{gradeClass}, #{phone}, #{password}, #{role}, #{createdAt}, #{updatedAt})")
     void saveUser(User user);
 
     @Select("SELECT * FROM user WHERE id = #{id}")

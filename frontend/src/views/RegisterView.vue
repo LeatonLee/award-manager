@@ -22,9 +22,20 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <!-- 手机号输入框 -->
+        <!-- 手机号和验证码输入框在一行内 -->
         <el-form-item>
-          <el-input v-model="form.phone" placeholder="手机号" maxlength="11"></el-input>
+          <el-row gutter={10}>
+            <el-col :span="16">
+              <el-input v-model="form.phone" placeholder="手机号" maxlength="11"></el-input>
+            </el-col>
+            <el-col :span="8">
+              <el-button type="primary" @click="sendSmsCode" :disabled="smsButtonDisabled">{{ smsButtonText }}</el-button>
+            </el-col>
+          </el-row>
+        </el-form-item>
+        <!-- 短信验证码输入框 -->
+        <el-form-item>
+          <el-input v-model="form.smsCode" placeholder="输入短信验证码"></el-input>
         </el-form-item>
         <!-- 密码输入框 -->
         <el-form-item>
@@ -32,6 +43,15 @@
             v-model="form.password"
             type="password"
             placeholder="密码"
+            show-password
+          ></el-input>
+        </el-form-item>
+        <!-- 确认密码输入框 -->
+        <el-form-item>
+          <el-input
+            v-model="form.confirmPassword"
+            type="password"
+            placeholder="确认密码"
             show-password
           ></el-input>
         </el-form-item>
@@ -45,54 +65,76 @@
   </div>
 </template>
 
+
 <script>
-import axios from 'axios'; // 使用 Axios 请求后端接口
+import axios from 'axios';
 
 export default {
   data() {
     return {
       form: {
-        id: '', // 学号
-        name: '', // 姓名
-        gradeClass: '', // 班级
-        phone: '', // 手机号
-        password: '', // 密码
+        id: '',
+        name: '',
+        gradeClass: '',
+        phone: '',
+        smsCode: '',
+        password: '',
+        confirmPassword: '',
       },
-      classList: [], // 班级列表
+      classList: [],
+      smsButtonDisabled: false,
+      smsButtonText: "发送验证码",
     };
   },
   methods: {
-    // 获取班级列表
     async fetchClassList() {
       try {
-        const response = await axios.get('/api/classes'); // 替换为你的后端接口地址
-        this.classList = response.data; // 假设返回的是一个班级数组
+        const response = await axios.get('/api/classes');
+        this.classList = response.data;
       } catch (error) {
         console.error('获取班级信息失败：', error);
       }
     },
-    // 注册处理
+    async sendSmsCode() {
+      try {
+        this.smsButtonDisabled = true;
+        this.smsButtonText = "发送中...";
+        await axios.post('/api/send-sms', { phone: this.form.phone });
+        this.$message.success('验证码已发送');
+        let count = 60;
+        const interval = setInterval(() => {
+          count -= 1;
+          this.smsButtonText = `${count}秒后重新发送`;
+          if (count === 0) {
+            clearInterval(interval);
+            this.smsButtonDisabled = false;
+            this.smsButtonText = "发送验证码";
+          }
+        }, 1000);
+      } catch (error) {
+        this.$message.error('发送验证码失败');
+        this.smsButtonDisabled = false;
+        this.smsButtonText = "发送验证码";
+      }
+    },
     async handleRegister() {
-  try {
-    const response = await axios.post('/api/register', this.form);
-    this.$message.success(response.data);
-    this.$router.push('/login');
-  } catch (error) {
-    console.error('注册错误:', error.response ? error.response.data : error);
-    if (error.response && error.response.status === 400) {
-      this.$message.error(error.response.data); // 学号或手机号已注册
-    } else {
-      this.$message.error('注册失败，请稍后重试');
-    }
-  }
-},
-
-    // 跳转到登录页面
+      if (this.form.password !== this.form.confirmPassword) {
+        this.$message.error('两次输入的密码不一致');
+        return;
+      }
+      try {
+        const response = await axios.post('/api/register', this.form);
+        this.$message.success(response.data);
+        this.$router.push('/login');
+      } catch (error) {
+        console.error('注册错误:', error.response ? error.response.data : error);
+        this.$message.error('注册失败，请稍后重试');
+      }
+    },
     goToLogin() {
       this.$router.push('/login');
     },
   },
-  // 在组件加载时获取班级列表
   created() {
     this.fetchClassList();
   },

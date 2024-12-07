@@ -2,6 +2,7 @@ package com.example.service.impl;
 
 import com.example.mapper.UserMapper;
 import com.example.pojo.User;
+import com.example.pojo.UserDTO;
 import com.example.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
+
 
     @Autowired
     private UserMapper userMapper;
@@ -29,6 +31,7 @@ public class UserServiceImpl implements UserService {
         log.info("Logging in user: " + user);
         return userMapper.getByIdAndPassword(user);
     }
+
     // 检查学号或手机号是否已注册
     public boolean isUserExists(String name, String phone) {
         return userMapper.findByName(name) != null || userMapper.findByPhone(phone) != null;
@@ -46,14 +49,25 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    // 注册用户
     @Override
-    public void registerUser(User user) {
-        // 设置默认值
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole("1"); // 默认角色
+    // 注册用户
+    public void registerUser(UserDTO userDTO) {
+        if (userDTO.getId() == null || !userDTO.getId().matches("\\d+")) {
+            throw new IllegalArgumentException("无效的学号！");
+        }
+        // 将 UserDTO 转换为 User 实体
+        User user = new User();
+        user.setId(Long.valueOf(userDTO.getId()));
+        user.setName(userDTO.getName());
+        user.setPhone(userDTO.getPhone());
+        user.setGradeClass(userDTO.getGradeClass());
+        user.setRole(userDTO.getRole());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));  // 加密密码
         user.setCreatedAt(LocalDate.now());
         user.setUpdatedAt(LocalDate.now());
+
+        // 保存用户到数据库
         userMapper.saveUser(user);
     }
+
 }
