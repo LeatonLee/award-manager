@@ -1,6 +1,7 @@
 package com.example.mapper;
 
 import com.example.pojo.User;
+import com.example.pojo.UserLoginRequest;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -14,7 +15,7 @@ public interface UserMapper {
      * @return
      */
     @Select("select * from user where id = #{id} and password = #{password}")
-    User getByIdAndPassword(User user);
+    User getByIdAndPassword(UserLoginRequest user);
 
     /**
      * 注册

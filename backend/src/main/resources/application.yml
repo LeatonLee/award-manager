@@ -1,8 +1,11 @@
 server:
   port: 7777
+  servlet:
+    session:
+      timeout: 30m  # 这里的 session 配置是正确的，确保 session 超时设置
 
 spring:
-  #数据库的连接信息
+  # 数据库的连接信息
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/lyt
@@ -15,16 +18,11 @@ spring:
     port: 6379
     password: Lyt20040512
     database: 0
-#Mybatis配置
+
+# MyBatis 配置
 mybatis:
   configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    map-underscore-to-camel-case: true
-    log-impl=org:
-      apache:
-        ibatis:
-          logging:
-            slf4j:
-              Slf4jImpl:
-  mapper-locations: classpath:/mapper/*.xml
-  type-aliases-package: com.example.pojo
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 使用标准输出日志
+    map-underscore-to-camel-case: true  # 支持下划线转驼峰命名
+  mapper-locations: classpath:/mapper/*.xml  # MyBatis XML 映射文件位置
+  type-aliases-package: com.example.pojo  # MyBatis 类型别名的包路径

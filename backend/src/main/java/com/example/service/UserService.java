@@ -2,6 +2,7 @@ package com.example.service;
 
 import com.example.pojo.User;
 import com.example.pojo.UserDTO;
+import com.example.pojo.UserLoginRequest;
 
 /**
  * 用户管理
@@ -12,7 +13,7 @@ public interface UserService {
      * @param user
      * @return
      */
-    User login(User user);
+    User login(UserLoginRequest user);
 
     /**
      * 注册用户

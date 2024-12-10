@@ -3,6 +3,7 @@ package com.example.service.impl;
 import com.example.mapper.UserMapper;
 import com.example.pojo.User;
 import com.example.pojo.UserDTO;
+import com.example.pojo.UserLoginRequest;
 import com.example.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public User login(User user) {
+    public User login(UserLoginRequest user) {
         log.info("Logging in user: " + user);
         return userMapper.getByIdAndPassword(user);
     }
