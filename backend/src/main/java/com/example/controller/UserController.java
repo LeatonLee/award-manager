@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.crypto.Cipher;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
 import java.util.Map;
 
 @RestController
@@ -23,6 +28,8 @@ public class UserController {
     @Autowired
     private SmsService smsService;
 
+    // RSA 私钥（需替换为你实际的私钥）
+    private static final String PRIVATE_KEY = "YOUR_PRIVATE_KEY_HERE";
 
     // 用户注册接口
     @PostMapping("/register")
@@ -39,10 +46,17 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("短信验证码错误！");
             }
 
+            // 解密密码
+            String decryptedPassword = decryptPassword(userDTO.getPassword());
+            String decryptedConfirmPassword = decryptPassword(userDTO.getConfirmPassword());
+
             // 校验密码一致性
-            if (!userDTO.getPassword().equals(userDTO.getConfirmPassword())) {
+            if (!decryptedPassword.equals(decryptedConfirmPassword)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("两次密码输入不一致！");
             }
+
+            // 将解密后的密码设置回 userDTO
+            userDTO.setPassword(decryptedPassword);
 
             // 注册用户
             userService.registerUser(userDTO);
@@ -53,8 +67,21 @@ public class UserController {
         }
     }
 
+    // 解密密码方法
+    private String decryptPassword(String encryptedPassword) throws Exception {
+        // 获取私钥对象
+        byte[] keyBytes = Base64.getDecoder().decode(PRIVATE_KEY);
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
 
+        // 使用私钥解密
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedPassword));
 
+        return new String(decryptedBytes);
+    }
 
     // 发送短信验证码
     @PostMapping("/send-sms")
@@ -68,4 +95,3 @@ public class UserController {
         }
     }
 }
-

@@ -8,6 +8,7 @@ import com.example.utils.JwtUtils;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
@@ -43,27 +44,27 @@ public class LoginController {
         }
 
         // 根据学号查询用户
-        User u = userService.login(loginRequest);
+        User u = userService.login(loginRequest); // 假设 userService 提供 findById 方法
 
-        if (u != null) {
-            // 直接比较明文密码
-            if (loginRequest.getPassword().equals(u.getPassword())) {
-                // 密码正确，生成 JWT
-                Map<String, Object> claims = new HashMap<>();
-                claims.put("studentId", u.getId());
-                claims.put("name", u.getName());
-                claims.put("role", u.getRole());
-                claims.put("className", u.getGradeClass());
-
-                String jwt = JwtUtils.generateJwt(claims); // 生成 JWT
-                return Result.success(jwt); // 返回 JWT
-            } else {
-                // 密码错误
-                return Result.error("用户名或密码错误");
-            }
+        if (u == null) {
+            return Result.error("用户不存在");
         }
-        // 用户不存在
-        return Result.error("用户名或密码错误");
+
+        // 验证密码
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        if (!passwordEncoder.matches(loginRequest.getPassword(), u.getPassword())) {
+            return Result.error("用户名或密码错误");
+        }
+
+        // 密码正确，生成 JWT
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("studentId", u.getId());
+        claims.put("name", u.getName());
+        claims.put("role", u.getRole());
+        claims.put("className", u.getGradeClass());
+
+        String jwt = JwtUtils.generateJwt(claims); // 生成 JWT
+        return Result.success(jwt); // 返回 JWT
     }
 
 

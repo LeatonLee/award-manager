@@ -22,14 +22,28 @@
             ></el-option>
           </el-select>
         </el-form-item>
+        <!-- 用户角色下拉列表 -->
+        <el-form-item>
+          <el-select v-model="form.role" placeholder="请选择角色">
+            <el-option label="普通用户" value="1"></el-option>
+            <el-option label="管理员" value="2"></el-option>
+          </el-select>
+        </el-form-item>
         <!-- 手机号和验证码输入框在一行内 -->
         <el-form-item>
-          <el-row gutter={10}>
+          <el-row :gutter="10">
             <el-col :span="16">
               <el-input v-model="form.phone" placeholder="手机号" maxlength="11"></el-input>
             </el-col>
             <el-col :span="8">
-              <el-button type="primary" @click="sendSmsCode" :disabled="smsButtonDisabled">{{ smsButtonText }}</el-button>
+              <el-button
+                type="primary"
+                :disabled="smsButtonDisabled"
+                @click="sendSmsCode"
+                class="sms-button"
+              >
+                {{ smsButtonText }}
+              </el-button>
             </el-col>
           </el-row>
         </el-form-item>
@@ -65,7 +79,6 @@
   </div>
 </template>
 
-
 <script>
 import axios from 'axios';
 
@@ -80,10 +93,11 @@ export default {
         smsCode: '',
         password: '',
         confirmPassword: '',
+        role: null, // 新增字段：用户角色
       },
-      classList: [],
-      smsButtonDisabled: false,
-      smsButtonText: "发送验证码",
+      classList: [], // 班级信息
+      smsButtonDisabled: false, // 验证码按钮禁用状态
+      smsButtonText: "发送验证码", // 验证码按钮文字
     };
   },
   methods: {
@@ -104,7 +118,7 @@ export default {
         let count = 60;
         const interval = setInterval(() => {
           count -= 1;
-          this.smsButtonText = `${count}秒后重新发送`;
+          this.smsButtonText = `${count} 秒后重新发送`;
           if (count === 0) {
             clearInterval(interval);
             this.smsButtonDisabled = false;
@@ -171,5 +185,12 @@ export default {
 .el-input,
 .el-select {
   width: 100%; /* 确保输入框和选择框一致宽度 */
+}
+
+.sms-button {
+  width: 100%; /* 保证按钮宽度固定 */
+  white-space: nowrap; /* 避免文字换行 */
+  overflow: hidden; /* 超出隐藏 */
+  text-overflow: ellipsis; /* 超出显示省略号 */
 }
 </style>

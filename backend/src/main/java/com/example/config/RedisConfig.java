@@ -27,6 +27,6 @@ public class RedisConfig {
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         // 配置Redis连接工厂
-        return new LettuceConnectionFactory("localhost", 6379); // 连接Redis的服务器地址和端口
+        return new LettuceConnectionFactory("127.0.0.1", 6379); // 连接Redis的服务器地址和端口
     }
 }

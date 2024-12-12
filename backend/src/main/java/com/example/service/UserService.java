@@ -30,4 +30,5 @@ public interface UserService {
     boolean isUserExists(String name, String phone);
 
     User findUserByNameOrPhone(String name, String phone);
+
 }
