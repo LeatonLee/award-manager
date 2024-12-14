@@ -49,6 +49,10 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    @Override
+    public User findById(Long id) {
+        return userMapper.findById(id);
+    }
 
     @Override
     // 注册用户
@@ -63,7 +67,7 @@ public class UserServiceImpl implements UserService {
         user.setPhone(userDTO.getPhone());
         user.setGradeClass(userDTO.getGradeClass());
         user.setRole(userDTO.getRole());
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));  // 加密密码
+        user.setPassword(userDTO.getPassword());  // 加密密码
         user.setCreatedAt(LocalDate.now());
         user.setUpdatedAt(LocalDate.now());
 

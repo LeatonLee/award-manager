@@ -131,20 +131,25 @@ export default {
         this.smsButtonText = "发送验证码";
       }
     },
-    async handleRegister() {
-      if (this.form.password !== this.form.confirmPassword) {
-        this.$message.error('两次输入的密码不一致');
-        return;
-      }
-      try {
-        const response = await axios.post('/api/register', this.form);
-        this.$message.success(response.data);
-        this.$router.push('/login');
-      } catch (error) {
-        console.error('注册错误:', error.response ? error.response.data : error);
-        this.$message.error('注册失败，请稍后重试');
-      }
-    },
+    // handleRegister 方法
+async handleRegister() {
+  if (!this.form.password || !this.form.confirmPassword) {
+    this.$message.error("密码不能为空");
+    return;
+  }
+  if (this.form.password !== this.form.confirmPassword) {
+    this.$message.error("两次输入的密码不一致");
+    return;
+  }
+  try {
+    const response = await axios.post("/api/register", this.form);
+    this.$message.success(response.data);
+    this.$router.push("/login");
+  } catch (error) {
+    console.error("注册错误:", error.response ? error.response.data : error);
+    this.$message.error("注册失败，请稍后重试");
+  }
+},
     goToLogin() {
       this.$router.push('/login');
     },
@@ -171,7 +176,7 @@ export default {
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 350px; /* 根据需要调整宽度 */
+  width: 400px; /* 根据需要调整宽度 */
 }
 
 .register-form {

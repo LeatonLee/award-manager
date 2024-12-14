@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserLoginRequest {
-    private String id;
+    private Long id;
     private String password;
-    private String verificationCode;  // 新增字段
+    private String verificationCode;
 
 }
 

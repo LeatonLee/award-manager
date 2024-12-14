@@ -31,4 +31,5 @@ public interface UserService {
 
     User findUserByNameOrPhone(String name, String phone);
 
+    User findById(Long id);
 }

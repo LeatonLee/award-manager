@@ -27,7 +27,7 @@
 
         <!-- 验证码输入框 -->
         <el-form-item>
-          <el-row :gutter="20">  <!-- 使用:绑定数字类型的gutter -->
+          <el-row :gutter="20"> <!-- 使用:绑定数字类型的gutter -->
             <el-col :span="12">
               <el-input
                 v-model="form.verificationCode"
@@ -93,8 +93,8 @@ export default {
           password: this.form.password,
           verificationCode: this.form.verificationCode, // 传递验证码
         },{
-    withCredentials: true  // 确保带上 Session Cookie
-});
+          withCredentials: true  // 确保带上 Session Cookie
+        });
 
         console.log(response); // 调试输出
 
@@ -132,6 +132,16 @@ export default {
     refreshCaptcha() {
       this.captchaImageUrl = 'http://localhost:7777/api/captcha?' + new Date().getTime();
     },
+
+    // 退出登录
+    logout() {
+      // 清除本地存储的 token
+      localStorage.removeItem('token');
+      // 刷新验证码
+      this.refreshCaptcha();
+      // 跳转到登录页面
+      this.$router.push('/login');
+    }
   },
 };
 </script>
@@ -152,7 +162,7 @@ export default {
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 300px;
+  width: 350px; /* 适当增加登录框宽度 */
 }
 
 .login-form {
