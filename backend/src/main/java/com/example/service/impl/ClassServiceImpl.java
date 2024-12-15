@@ -18,6 +18,7 @@ public class ClassServiceImpl implements ClassService {
     @Autowired
     private ClassMapper classMapper;
 
+
     public void addMember(User user) {
         classMapper.insertMember(user);
     }
@@ -28,13 +29,29 @@ public class ClassServiceImpl implements ClassService {
         return classMapper.getAllClasses();
     }
 
-    public PageBean page(Integer page, Integer pageSize, String className) {
-        PageHelper.startPage(page,pageSize);
+    @Override
+    public PageBean page(Integer page, Integer pageSize, String className, String name, Long id, Integer sortByAwards) {
+        // 使用 PageHelper 启动分页
+        PageHelper.startPage(page, pageSize);
 
-        List<User> userList = classMapper.list(className);
+        // 调用 Mapper 层的查询方法，传递查询条件
+        List<User> userList = classMapper.listWithSearch(className, name, id, sortByAwards);
+
+        // 转换为 Page 对象以便获取总数和分页数据
         Page<User> u = (Page<User>) userList;
 
-        PageBean pageBean = new PageBean(u.getTotal(),u.getResult());
+        // 将结果封装到 PageBean 中返回
+        PageBean pageBean = new PageBean(u.getTotal(), u.getResult());
         return pageBean;
+    }
+
+
+    @Override
+    public void updateAwardCount(Long userId) {
+        // 获取该用户的获奖数量
+        int awardCount = classMapper.getAwardCountByUserId(userId);
+
+        // 更新用户的获奖数量
+        classMapper.updateAwardCount(userId, awardCount);
     }
 }

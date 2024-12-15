@@ -18,6 +18,7 @@ public class ClassController {
     @Autowired
     private ClassService classService;
 
+
     // 获取班级列表
     @GetMapping
     public List<GradeClass> getClassList() {
@@ -27,14 +28,28 @@ public class ClassController {
     @GetMapping("/{className}")
     public Result getClassMembers(@PathVariable String className,
                                   @RequestHeader("Authorization") String token,
-                                  @RequestParam(defaultValue = "1") Integer page,
-                                  @RequestParam(defaultValue = "10") Integer pageSize) {
-            // 从 Bearer Token 中提取 JWT 部分
-            String jwt = token.replace("Bearer ", "");
-            Claims claims = JwtUtils.parseJWT(jwt); // 解析 JWT
-            Long studentId = Long.parseLong(claims.get("studentId").toString()); // 提取 studentId
+                                  @RequestParam(required = false) String name,  // 姓名模糊搜索
+                                  @RequestParam(required = false) Long id,    // 学号模糊搜索
+                                  @RequestParam(defaultValue = "0") Integer sortByAwards,  // 按获奖数量排序 0: 升序, 1: 降序
+                                  @RequestParam(defaultValue = "1") Integer page, // 当前页码
+                                  @RequestParam(defaultValue = "10") Integer pageSize) { // 每页数据量
+        // 从 Bearer Token 中提取 JWT 部分
+        String jwt = token.replace("Bearer ", "");
+        Claims claims = JwtUtils.parseJWT(jwt); // 解析 JWT
+        Long studentId = Long.parseLong(claims.get("studentId").toString()); // 提取 studentId
 
-            PageBean pageBean = classService.page(page,pageSize,className);
-            return Result.success(pageBean);
+        // 调用 service 层的方法，传入分页和搜索条件
+        PageBean pageBean = classService.page(page, pageSize, className, name, id, sortByAwards);
+
+        // 返回分页结果
+        return Result.success(pageBean);
+    }
+
+
+
+    // 更新用户的获奖数量
+    @PostMapping("/updateAwardCount")
+    public void updateAwardCount(@RequestParam Long userId) {
+        classService.updateAwardCount(userId);
     }
 }

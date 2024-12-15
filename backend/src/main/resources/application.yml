@@ -26,3 +26,10 @@ mybatis:
     map-underscore-to-camel-case: true  # 支持下划线转驼峰命名
   mapper-locations: classpath:/mapper/*.xml  # MyBatis XML 映射文件位置
   type-aliases-package: com.example.pojo  # MyBatis 类型别名的包路径
+
+aliyun:
+  sms:
+    accessKeyId: LTAI5tBahhkkV6mW9QNBVEZW     # 阿里云 Access Key ID
+    accessKeySecret: TfhvCa7WAnLaZsLQbcCoCs0XriAPto # 阿里云 Access Key Secret
+    signName: yourSignName           # 短信签名
+    templateCode: yourTemplateCode   # 短信模板 Code

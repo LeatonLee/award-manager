@@ -1,31 +1,32 @@
 <template>
   <el-card>
     <div class="search-bar">
-  <!-- 姓名模糊搜索 -->
-  <el-input 
-    v-model="searchParams.name" 
-    placeholder="按姓名搜索" 
-    clearable 
-    style="width: 200px; margin-right: 10px;"
-  />
-  
-  <!-- 学号模糊搜索 -->
-  <el-input 
-    v-model="searchParams.id" 
-    placeholder="按学号搜索" 
-    clearable 
-    style="width: 200px; margin-right: 10px;"
-  />
-  
-  <!-- 排序 -->
-  <el-select v-model="searchParams.sortByAwards" placeholder="按获奖数量排序" style="width: 200px;">
-    <el-option label="升序" value="asc"></el-option>
-    <el-option label="降序" value="desc"></el-option>
-  </el-select>
+      <!-- 姓名模糊搜索 -->
+      <el-input 
+        v-model="searchParams.name" 
+        placeholder="按姓名搜索" 
+        clearable 
+        style="width: 200px; margin-right: 10px;"
+      />
+      
+      <!-- 学号模糊搜索 -->
+      <el-input 
+        v-model="searchParams.id" 
+        placeholder="按学号搜索" 
+        clearable 
+        style="width: 200px; margin-right: 10px;"
+      />
+      
+      <!-- 排序 -->
+      <el-select v-model="searchParams.sortByAwards" placeholder="按获奖数量排序" style="width: 200px;">
+        <el-option label="升序" value="0"></el-option>
+        <el-option label="降序" value="1"></el-option>
+      </el-select>
 
-  <el-button type="primary" @click="searchMembers">搜索</el-button>
-  <el-button @click="clearSearch">清除</el-button>
-</div>
+      <el-button type="primary" @click="searchMembers">搜索</el-button>
+      <el-button @click="clearSearch">清除</el-button>
+    </div>
+
     <!-- 班级信息 -->
     <div class="class-info">
       <el-row>
@@ -34,13 +35,14 @@
         </el-col>
       </el-row>
     </div>
- 
+
     <!-- 简化版班级成员表格 -->
     <el-table :data="classMembers" stripe>
       <el-table-column prop="id" label="学号" width="180"></el-table-column>
       <el-table-column prop="name" label="成员姓名" width="180"></el-table-column>
       <el-table-column prop="gradeClass" label="班级" width="180"></el-table-column>
       <el-table-column prop="phone" label="电话" width="180"></el-table-column>
+      <el-table-column prop="awardCount" label="获奖总数" width="180"></el-table-column>
       <el-table-column prop="createdAt" label="创建时间" width="200"></el-table-column>
     </el-table>
 
@@ -100,12 +102,11 @@ export default {
       searchParams: {
         name: '',
         id: '',
-        sortByAwards: ''
+        sortByAwards: '' // 排序条件：升序或降序
       },
     };
   },
   mounted() {
-    console.log(this.$route); // 打印当前路由信息
     const token = localStorage.getItem('token');
     if (token) {
       try {
@@ -122,40 +123,9 @@ export default {
     }
   },
   methods: {
-     // 处理输入变化，进行模糊查询
-     handleInput(field) {
-      clearTimeout(this.debounceTimeout);
-      this.debounceTimeout = setTimeout(() => {
-        if (this.searchParams[field].trim()) {
-          this.fetchSuggestions(field);
-        } else {
-          this.suggestions[field] = []; // 清空建议列表
-        }
-      }, 300); // 延迟300ms以减少频繁请求
-    },
-
-    // 获取模糊匹配建议
-    fetchSuggestions(field) {
-      axios.get(`/api/search/suggestions`, {
-        params: { query: this.searchParams[field], field }
-      })
-      .then(response => {
-        this.suggestions[field] = response.data.suggestions || [];
-      })
-      .catch(error => {
-        console.error(`获取${field}建议失败`, error);
-      });
-    },
-
-    // 选择建议项
-    selectSuggestion(field, value) {
-      this.searchParams[field] = value;
-      this.suggestions[field] = []; // 清空建议列表
-    },
-
     // 搜索成员
     searchMembers() {
-      this.fetchClassMembers(1); // 调用获取成员的方法
+      this.fetchClassMembers(1); // 调用获取成员的方法并重新加载第一页数据
     },
     // 获取班级成员数据
     fetchClassMembers(page = this.currentPage) {
@@ -221,78 +191,11 @@ export default {
         sortByAwards: ''
       };
       this.fetchClassMembers(1); // 清除后重新加载第一页数据
-  },
-    // 提交成员（添加/更新）
-    submitMember() {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('Token 不存在');
-        return;
-      }
-
-      if (this.memberForm.id) {
-        // 更新成员
-        axios.put(`/api/classes/members/${this.memberForm.id}`, this.memberForm, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        })
-        .then(() => {
-          this.$message.success('成员更新成功');
-          this.fetchClassMembers(this.currentPage); // 重新加载成员数据
-          this.closeDialog();
-        })
-        .catch(error => {
-          console.error('更新成员失败', error);
-        });
-      } else {
-        // 添加新成员
-        axios.post(`/api/classes/${this.localClassName}/members`, this.memberForm, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        })
-        .then(() => {
-          this.$message.success('成员添加成功');
-          this.fetchClassMembers(this.currentPage); // 重新加载成员数据
-          this.closeDialog();
-        })
-        .catch(error => {
-          console.error('添加成员失败', error);
-        });
-      }
-    },
-
-    // 编辑成员
-    editMember(member) {
-      this.memberForm = { ...member };
-      this.dialogVisible = true;
-    },
-
-    // 删除成员
-    deleteMember(id) {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('Token 不存在');
-        return;
-      }
-
-      axios.delete(`/api/classes/members/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      })
-      .then(() => {
-        this.$message.success('成员删除成功');
-        this.fetchClassMembers(this.currentPage); // 重新加载成员数据
-      })
-      .catch(error => {
-        console.error('删除成员失败', error);
-      });
-    },
+    }
   }
 }
 </script>
+
 
 
 

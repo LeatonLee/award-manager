@@ -8,12 +8,6 @@ import com.example.pojo.UserLoginRequest;
  * 用户管理
  */
 public interface UserService {
-    /**
-     * 用户登录
-     * @param user
-     * @return
-     */
-    User login(UserLoginRequest user);
 
     /**
      * 注册用户
@@ -21,15 +15,10 @@ public interface UserService {
      */
     void registerUser(UserDTO userDTO);
 
-    /**
-     * 判断用户是否存在
-     * @param name
-     * @param phone
-     * @return
-     */
-    boolean isUserExists(String name, String phone);
+    User login(UserLoginRequest user);
 
     User findUserByNameOrPhone(String name, String phone);
 
     User findById(Long id);
+
 }

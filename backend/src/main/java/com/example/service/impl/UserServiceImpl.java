@@ -7,7 +7,6 @@ import com.example.pojo.UserLoginRequest;
 import com.example.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,12 +15,9 @@ import java.time.LocalDate;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-
     @Autowired
     private UserMapper userMapper;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
     /**
      * 用户登录
      * @param user
@@ -53,6 +49,7 @@ public class UserServiceImpl implements UserService {
     public User findById(Long id) {
         return userMapper.findById(id);
     }
+
 
     @Override
     // 注册用户

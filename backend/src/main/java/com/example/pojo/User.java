@@ -22,5 +22,5 @@ public class User {
     private String role;//1，学生；2，管理员
     private LocalDate createdAt;
     private LocalDate updatedAt;
-
+    private int awardCount; // 添加获奖数量字段
 }

@@ -3,7 +3,7 @@
 <mapper namespace="com.example.mapper.ClassMapper">
 
     <select id="list" resultType="com.example.pojo.User">
-        select id, name, grade_class AS gradeClass, phone, role, created_at AS createdAt, updated_at AS updatedAt
+        select id, name, grade_class AS gradeClass, phone, award_count, role, created_at AS createdAt, updated_at AS updatedAt
         from user
         where grade_class = #{className} AND role = '1'
     </select>
@@ -25,4 +25,32 @@
     <delete id="deleteMember">
         DELETE FROM user WHERE id = #{id}
     </delete>
+
+    <select id="listWithSearch" resultType="com.example.pojo.User">
+        SELECT *
+        FROM user
+        WHERE grade_class = #{className}
+        AND role = 1  <!-- 只查询普通用户 -->
+        <if test="name != null and name != ''">
+            AND name LIKE CONCAT('%', #{name}, '%')
+        </if>
+        <if test="id != null">
+            AND id = #{id}  <!-- 精确匹配 id -->
+        </if>
+        <if test="sortByAwards != null">
+            <choose>
+                <when test="sortByAwards == 0">
+                    ORDER BY award_count ASC
+                </when>
+                <when test="sortByAwards == 1">
+                    ORDER BY award_count DESC
+                </when>
+                <otherwise>
+                    ORDER BY id ASC
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+
+
 </mapper>
