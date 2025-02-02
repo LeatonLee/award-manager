@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.pojo.GradeClass;
 import com.example.pojo.PageBean;
 import com.example.pojo.Result;
+import com.example.pojo.UpdateGradeClassRequest;
 import com.example.service.ClassService;
 import com.example.utils.JwtUtils;
 import io.jsonwebtoken.Claims;
@@ -18,8 +19,10 @@ public class ClassController {
     @Autowired
     private ClassService classService;
 
-
-    // 获取班级列表
+    /**
+     * 获取班级列表
+     * @return
+     */
     @GetMapping
     public List<GradeClass> getClassList() {
         return classService.getClassList();
@@ -45,11 +48,18 @@ public class ClassController {
         return Result.success(pageBean);
     }
 
-
-
-    // 更新用户的获奖数量
+    /**
+     * 更新用户的获奖数量
+     * @param userId
+     */
     @PostMapping("/updateAwardCount")
     public void updateAwardCount(@RequestParam Long userId) {
         classService.updateAwardCount(userId);
+    }
+
+    @PostMapping("/updateGradeClass")
+    public Result updateGradeClass(@RequestBody UpdateGradeClassRequest request) {
+        classService.updateGradeClass(request.getUserId(), request.getGradeClass());
+        return Result.success();
     }
 }

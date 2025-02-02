@@ -2,7 +2,6 @@ package com.example.service;
 
 import com.example.pojo.User;
 import com.example.pojo.UserDTO;
-import com.example.pojo.UserLoginRequest;
 
 /**
  * 用户管理
@@ -15,10 +14,11 @@ public interface UserService {
      */
     void registerUser(UserDTO userDTO);
 
-    User login(UserLoginRequest user);
-
-    User findUserByNameOrPhone(String name, String phone);
-
+    /**
+     * 根据id查找用户
+     * @param id
+     * @return
+     */
     User findById(Long id);
 
 }

@@ -13,7 +13,11 @@ public class SmsServiceImpl implements SmsService {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
-    // 发送短信验证码并保存到 Redis
+    /**
+     * 发送短信验证码并保存到 Redis
+     * @param phone
+     * @return
+     */
     public boolean sendSms(String phone) {
         String code = generateCode();  // 生成验证码
         redisTemplate.opsForValue().set(phone, code, 5, TimeUnit.MINUTES);  // 将验证码存入 Redis，5分钟有效期
@@ -23,12 +27,10 @@ public class SmsServiceImpl implements SmsService {
         return true;  // 返回成功
     }
 
-    // 获取存储在 Redis 中的验证码
-    public String getSmsCode(String phone) {
-        return redisTemplate.opsForValue().get(phone);
-    }
-
-    // 生成验证码
+    /**
+     * 生成验证码
+     * @return
+     */
     private String generateCode() {
         return String.valueOf(new Random().nextInt(899999) + 100000); // 生成6位验证码
     }

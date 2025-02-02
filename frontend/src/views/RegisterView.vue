@@ -24,9 +24,8 @@
         </el-form-item>
         <!-- 用户角色下拉列表 -->
         <el-form-item>
-          <el-select v-model="form.role" placeholder="请选择角色">
+          <el-select v-model="form.role" placeholder="请选择角色" :disabled="true" >
             <el-option label="普通用户" value="1"></el-option>
-            <el-option label="管理员" value="2"></el-option>
           </el-select>
         </el-form-item>
         <!-- 手机号和验证码输入框在一行内 -->
@@ -93,7 +92,7 @@ export default {
         smsCode: '',
         password: '',
         confirmPassword: '',
-        role: null, // 新增字段：用户角色
+        role: '1', // 新增字段：用户角色
       },
       classList: [], // 班级信息
       smsButtonDisabled: false, // 验证码按钮禁用状态

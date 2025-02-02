@@ -33,3 +33,9 @@ aliyun:
     accessKeySecret: TfhvCa7WAnLaZsLQbcCoCs0XriAPto # 阿里云 Access Key Secret
     signName: yourSignName           # 短信签名
     templateCode: yourTemplateCode   # 短信模板 Code
+  oss:
+    endpoint: https://oss-cn-beijing.aliyuncs.com  # 替换为你的 OSS 区域 Endpoint
+    accessKeyId: LTAI5tPs9hHc5fJS7JuG8VJj                   # 替换为你的 Access Key ID
+    accessKeySecret: AnJUWH9i9uimkIXrPiFOSaRvZRyRPe           # 替换为你的 Access Key Secret
+    bucketName: lnu-leaton                            # 替换为你的 Bucket 名称
+    filePath: awards/                                 # 存储文件的路径前缀

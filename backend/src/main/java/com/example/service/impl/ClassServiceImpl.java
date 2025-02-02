@@ -1,6 +1,7 @@
 package com.example.service.impl;
 
 import com.example.mapper.ClassMapper;
+import com.example.mapper.UserMapper;
 import com.example.pojo.GradeClass;
 import com.example.pojo.PageBean;
 import com.example.pojo.User;
@@ -18,11 +19,8 @@ public class ClassServiceImpl implements ClassService {
     @Autowired
     private ClassMapper classMapper;
 
-
-    public void addMember(User user) {
-        classMapper.insertMember(user);
-    }
-
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public List<GradeClass> getClassList() {
@@ -48,10 +46,16 @@ public class ClassServiceImpl implements ClassService {
 
     @Override
     public void updateAwardCount(Long userId) {
+
         // 获取该用户的获奖数量
         int awardCount = classMapper.getAwardCountByUserId(userId);
 
         // 更新用户的获奖数量
         classMapper.updateAwardCount(userId, awardCount);
+    }
+
+    @Override
+    public void updateGradeClass(Long userId, String gradeClass) {
+        userMapper.updateGradeClass(userId, gradeClass);
     }
 }

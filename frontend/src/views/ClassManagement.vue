@@ -38,12 +38,21 @@
 
     <!-- 简化版班级成员表格 -->
     <el-table :data="classMembers" stripe>
-      <el-table-column prop="id" label="学号" width="180"></el-table-column>
-      <el-table-column prop="name" label="成员姓名" width="180"></el-table-column>
-      <el-table-column prop="gradeClass" label="班级" width="180"></el-table-column>
-      <el-table-column prop="phone" label="电话" width="180"></el-table-column>
-      <el-table-column prop="awardCount" label="获奖总数" width="180"></el-table-column>
+      <el-table-column prop="id" label="学号" width="140"></el-table-column>
+      <el-table-column prop="name" label="成员姓名" width="100"></el-table-column>
+      <el-table-column prop="gradeClass" label="班级" width="150"></el-table-column>
+      <el-table-column prop="phone" label="电话" width="150"></el-table-column>
+      <el-table-column prop="awardCount" label="获奖总数" width="150"></el-table-column>
       <el-table-column prop="createdAt" label="创建时间" width="200"></el-table-column>
+      <el-table-column label="操作" width="120">
+    <template slot-scope="scope">
+      <el-button 
+        type="danger" 
+        size="mini" 
+        @click="handleDeleteMember(scope.row)"
+      >移出班级</el-button>
+    </template>
+  </el-table-column>
     </el-table>
 
     <!-- 分页组件 -->
@@ -54,28 +63,6 @@
       layout="total, prev, pager, next, jumper"
       @current-change="handlePageChange"
     />
-
-    <!-- 添加成员按钮 -->
-    <el-button type="primary" @click="openDialog">添加成员</el-button>
-
-    <!-- 添加/编辑成员弹窗 -->
-    <el-dialog :visible.sync="dialogVisible" title="成员信息">
-      <el-form :model="memberForm" ref="memberForm" label-width="100px">
-        <el-form-item label="姓名" prop="name" :rules="[{ required: true, message: '请输入姓名', trigger: 'blur' }]">
-          <el-input v-model="memberForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="角色" prop="role" :rules="[{ required: true, message: '请选择角色', trigger: 'change' }]">
-          <el-select v-model="memberForm.role" placeholder="选择角色">
-            <el-option label="学生" value="2"></el-option>
-            <el-option label="教师" value="1"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submitMember">提交</el-button>
-          <el-button @click="closeDialog">取消</el-button>
-        </el-form-item>
-      </el-form>
-    </el-dialog>
   </el-card>
 </template>
 
@@ -123,6 +110,32 @@ export default {
     }
   },
   methods: {
+    // 处理删除成员
+  handleDeleteMember(row) {
+    this.$confirm('确定将该成员移出班级吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      const token = localStorage.getItem('token');
+      axios.post('/api/classes/updateGradeClass', {
+        userId: row.id,
+        gradeClass: '暂无班级'
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then(response => {
+        if (response.data.code === 1) {
+          this.$message.success('操作成功');
+          this.fetchClassMembers(); // 刷新数据
+        } else {
+          this.$message.error(response.data.msg || '操作失败');
+        }
+      }).catch(error => {
+        console.error(error);
+        this.$message.error('请求失败');
+      });
+    }).catch(() => {});
+  },
     // 搜索成员
     searchMembers() {
       this.fetchClassMembers(1); // 调用获取成员的方法并重新加载第一页数据

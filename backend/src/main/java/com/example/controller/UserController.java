@@ -27,7 +27,11 @@ public class UserController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    // 用户注册接口
+    /**
+     * 注册用户
+     * @param userDTO
+     * @return
+     */
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody UserDTO userDTO) {
         try {
@@ -48,8 +52,11 @@ public class UserController {
         }
     }
 
-
-    // 发送短信验证码
+    /**
+     * 发送短信验证码
+     * @param request
+     * @return
+     */
     @PostMapping("/send-sms")
     public ResponseEntity<String> sendSmsCode(@RequestBody Map<String, String> request) {
         String phone = request.get("phone");

@@ -29,11 +29,17 @@ public class LoginController {
     private UserService userService;
 
     @Autowired
-    private DefaultKaptcha defaultKaptcha; // 用于验证码生成
+    private DefaultKaptcha defaultKaptcha;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    /**
+     * 用户登录
+     * @param loginRequest
+     * @param request
+     * @return
+     */
     @PostMapping("/login")
     public Result login(@RequestBody UserLoginRequest loginRequest, HttpServletRequest request) {
         log.info("接收到的登录请求：id={}, password={}, verificationCode={}", loginRequest.getId(), loginRequest.getPassword(), loginRequest.getVerificationCode());
@@ -53,7 +59,7 @@ public class LoginController {
             return Result.error("用户不存在");
         }
 
-        // 直接使用 matches() 方法验证密码，而不是手动加密
+        // 直接使用 matches() 方法验证密码
         boolean passwordMatches = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
         log.info("BCryptPasswordEncoder.matches() 比较结果: {}", passwordMatches);
 
@@ -67,7 +73,6 @@ public class LoginController {
         claims.put("name", user.getName());
         claims.put("role", user.getRole());
         claims.put("className", user.getGradeClass());
-
         String jwt = JwtUtils.generateJwt(claims);
         return Result.success(jwt);
     }
