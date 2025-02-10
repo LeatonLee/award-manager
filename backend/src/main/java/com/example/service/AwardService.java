@@ -16,4 +16,8 @@ public interface AwardService {
     PageBean getAwardList(Integer page, Integer pageSize, String className);
 
     void deleteAward(Long id);
+
+    PageBean getUserAwards(Integer page, Integer pageSize, Long userId, String keyword);
+
+
 }

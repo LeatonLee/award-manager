@@ -6,12 +6,15 @@ import com.example.pojo.Award;
 import com.example.pojo.AwardRequest;
 import com.example.pojo.PageBean;
 import com.example.service.AwardService;
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AwardServiceImpl implements AwardService {
@@ -64,4 +67,19 @@ public class AwardServiceImpl implements AwardService {
         int awardCount = classMapper.getAwardCountByUserId(userId);
         classMapper.updateAwardCount(userId, awardCount);
     }
+
+    @Override
+    public PageBean getUserAwards(Integer page, Integer pageSize, Long userId, String keyword) {
+        PageHelper.startPage(page, pageSize);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("keyword", keyword);
+
+        List<Award> awards = awardMapper.selectByUserId(params);
+
+        Page<Award> p = (Page<Award>) awards;
+        return new PageBean(p.getTotal(), p.getResult());
+    }
+
 }

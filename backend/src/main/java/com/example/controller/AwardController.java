@@ -31,7 +31,12 @@ public class AwardController {
     @Autowired
     private JwtUtils jwtUtils;
 
-
+    /**
+     * 证书上传
+     * @param file
+     * @param authorizationHeader
+     * @return
+     */
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(
             @RequestPart("file") MultipartFile file,
@@ -66,7 +71,8 @@ public class AwardController {
 
     /**
      * 添加奖项信息
-     * @param awardRequest 奖项信息
+     *
+     * @param awardRequest        奖项信息
      * @param authorizationHeader 用户请求信息
      * @return 是否成功
      */
@@ -99,6 +105,13 @@ public class AwardController {
         }
     }
 
+    /**
+     * 获取获奖信息
+     * @param page
+     * @param pageSize
+     * @param className
+     * @return
+     */
     @GetMapping("/list")
     public Result getAwardList(
             @RequestParam(defaultValue = "1") Integer page,
@@ -109,9 +122,42 @@ public class AwardController {
         return Result.success(pageBean);
     }
 
+    /**
+     * 删除获奖信息
+     * @param id
+     * @return
+     */
     @DeleteMapping("/delete/{id}")
     public Result deleteAward(@PathVariable Long id) {
         awardService.deleteAward(id);
         return Result.success();
+    }
+
+    /**
+     * 用户历史获奖
+     *
+     * @param page
+     * @param pageSize
+     * @param keyword
+     * @param authorizationHeader
+     * @return
+     */
+    @GetMapping("/user/list")
+    public Result getUserAwards(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String keyword,
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        // 解析 Token
+        String token = authorizationHeader.replace("Bearer ", "");
+        Claims claims = jwtUtils.parseJWT(token);
+        if (claims == null) {
+            return Result.error("无效的 token");
+        }
+
+        Long userId = Long.parseLong(claims.get("studentId").toString());
+        PageBean pageBean = awardService.getUserAwards(page, pageSize, userId, keyword);
+        return Result.success(pageBean);
     }
 }

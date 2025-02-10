@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.mapper.AwardMapper">
+    <select id="selectByUserId" resultType="com.example.pojo.Award">
+        SELECT * FROM award
+        WHERE user_id = #{userId}
+        <if test="keyword != null and keyword != ''">
+            AND award_name LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        ORDER BY award_date DESC
+    </select>
+</mapper>
