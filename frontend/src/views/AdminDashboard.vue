@@ -76,34 +76,47 @@ export default {
 ,
   methods: {
     navigateToClassManagement() {
-      const className = localStorage.getItem('className');  // 获取班级信息
-      if (className) {
-        const currentRoute = this.$router.currentRoute.fullPath;
-        const targetRoute = `/admin/class-management/${className}`;
-        
-        if (currentRoute !== targetRoute) {  // 只有当当前路由不等于目标路由时才跳转
-          this.$router.push(targetRoute);
-          this.activeMenu = '2'; // 设置为“班级管理”菜单高亮
-          this.pageTitle = '班级成员管理'; // 设置标题为班级管理
-        }
-      } else {
-        this.$message.error('无法获取班级信息');
-      }
-    },
-
-    navigateToAwardInfo() {
+    const className = localStorage.getItem('className');  // 获取班级信息
+    if (className) {
       const currentRoute = this.$router.currentRoute.fullPath;
-      if (currentRoute !== '/admin') {  // 只有当当前路由不等于目标路由时才跳转
-        this.$router.push('/admin'); // 跳转到管理员页面，默认显示获奖信息
-        this.activeMenu = '1'; // 设置为“获奖信息”菜单高亮
-        this.pageTitle = '获奖信息管理'; // 设置标题为获奖信息管理
+      const targetRoute = `/admin/class-management/${className}`;
+      
+      if (currentRoute !== targetRoute) {  // 只有当当前路由不等于目标路由时才跳转
+        this.$router.push(targetRoute);
+        this.activeMenu = '2'; // 设置为“班级管理”菜单高亮
+        this.pageTitle = '班级成员管理'; // 设置标题为班级管理
+      } else {
+        this.$message.warning('您已经在班级管理页面');
       }
-    },
-    logout() {
+    } else {
+      this.$message.error('无法获取班级信息');
+    }
+  },
+
+  navigateToAwardInfo() {
+    const currentRoute = this.$router.currentRoute.fullPath;
+    if (currentRoute !== '/admin/award-info') {  // 只有当当前路由不等于目标路由时才跳转
+      this.$router.push('/admin'); // 跳转到管理员页面，默认显示获奖信息
+      this.activeMenu = '1'; // 设置为“获奖信息”菜单高亮
+      this.pageTitle = '获奖信息管理'; // 设置标题为获奖信息管理
+    } else {
+      this.$message.warning('您已经在获奖信息页面');
+    }
+  },
+  logout() {
+    this.$confirm('确定退出登录吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
       localStorage.removeItem('token');
       this.$router.push('/login');
-    },
-  },
+      this.$message.success('退出登录成功');
+    }).catch(() => {
+      this.$message.info('已取消退出登录');
+    });
+  }
+}
 };
 </script>
 
