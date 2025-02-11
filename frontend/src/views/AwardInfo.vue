@@ -19,20 +19,17 @@
       <el-table-column prop="name" label="学生姓名" align="center"></el-table-column>
       <el-table-column prop="awardName" label="获奖名称" align="center"></el-table-column>
       <el-table-column prop="awardDate" label="获奖时间" align="center"></el-table-column>
-      <el-table-column label="证书" align="center">
-        <template slot-scope="scope">
-          <el-image
-            style="width: 100px; height: 100px"
-            :src="scope.row.certificateUrl"
-            :preview-src-list="[scope.row.certificateUrl]"
-            fit="cover"
-          >
-            <div slot="error" class="image-slot">
-              <i class="el-icon-picture-outline"></i>
-            </div>
-          </el-image>
-        </template>
-      </el-table-column>
+      <el-table-column prop="certificateUrl" label="证书" align="center" width="200">
+            <template #default="scope">
+              <img 
+                v-if="scope.row.certificateUrl"  
+                :src="scope.row.certificateUrl"  
+                alt="证书"
+                style="max-width: 100px; max-height: 100px; cursor: zoom-in;"
+                @click="previewCertificate(scope.row.certificateUrl)"  
+              />
+            </template>
+          </el-table-column>
       <el-table-column label="操作" align="center">
         <template slot-scope="scope">
           <div style="display: flex; justify-content: center">
